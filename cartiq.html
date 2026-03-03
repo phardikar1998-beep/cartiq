@@ -1,0 +1,3323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>CartIQ</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/recharts@2.12.0/umd/Recharts.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: #0F0F1A; overflow-x: hidden; }
+    #root { min-height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    // Storage shim using localStorage
+    window.storage = {
+      get: function(key) {
+        try { var v = localStorage.getItem(key); return Promise.resolve(v ? {value: v} : null); }
+        catch(e) { return Promise.resolve(null); }
+      },
+      set: function(key, value) {
+        try { localStorage.setItem(key, String(value)); return Promise.resolve({value: value}); }
+        catch(e) { return Promise.resolve(null); }
+      },
+      delete: function(key) {
+        try { localStorage.removeItem(key); return Promise.resolve({deleted: true}); }
+        catch(e) { return Promise.resolve(null); }
+      },
+      list: function() { return Promise.resolve({keys: []}); }
+    };
+
+    // Expose globals that compiled code expects
+    var useState = React.useState;
+    var useEffect = React.useEffect;
+    var useRef = React.useRef;
+    var LineChart = Recharts.LineChart;
+    var Line = Recharts.Line;
+    var XAxis = Recharts.XAxis;
+    var YAxis = Recharts.YAxis;
+    var CartesianGrid = Recharts.CartesianGrid;
+    var Tooltip = Recharts.Tooltip;
+    var ResponsiveContainer = Recharts.ResponsiveContainer;
+    var PieChart = Recharts.PieChart;
+    var Pie = Recharts.Pie;
+    var Cell = Recharts.Cell;
+    var Legend = Recharts.Legend;
+  </script>
+  <script>
+"use strict";
+
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+var STORAGE_KEY = "grocery_tracker_orders";
+var BUDGET_KEY = "grocery_tracker_budget";
+var INSIGHTS_KEY = "grocery_insights";
+var DEFAULT_BUDGET = 500;
+var C = {
+  lime: "#C8F135",
+  coral: "#FF6B6B",
+  sky: "#4ECDC4",
+  purple: "#A855F7",
+  orange: "#FF9F1C",
+  pink: "#FF6EB4",
+  bg: "#0F0F1A",
+  card: "#1A1A2E",
+  cardHover: "#1F1F38",
+  text: "#F0F0FF",
+  muted: "#8888AA",
+  border: "#2A2A45"
+};
+var DONUT_COLORS = {
+  Protein: "#FF6B6B",
+  Produce: "#C8F135",
+  Dairy: "#4ECDC4",
+  Pantry: "#FF9F1C",
+  Snacks: "#FF6EB4",
+  Beverages: "#A855F7",
+  Frozen: "#60A5FA",
+  Other: "#888888"
+};
+var TAG = {
+  Protein: {
+    bg: "#FF6B6B22",
+    border: "#FF6B6B",
+    text: "#FF6B6B"
+  },
+  Produce: {
+    bg: "#C8F13522",
+    border: "#C8F135",
+    text: "#C8F135"
+  },
+  Dairy: {
+    bg: "#4ECDC422",
+    border: "#4ECDC4",
+    text: "#4ECDC4"
+  },
+  Pantry: {
+    bg: "#FF9F1C22",
+    border: "#FF9F1C",
+    text: "#FF9F1C"
+  },
+  Snacks: {
+    bg: "#FF6EB422",
+    border: "#FF6EB4",
+    text: "#FF6EB4"
+  },
+  Beverages: {
+    bg: "#A855F722",
+    border: "#A855F7",
+    text: "#A855F7"
+  },
+  Frozen: {
+    bg: "#60A5FA22",
+    border: "#60A5FA",
+    text: "#60A5FA"
+  },
+  Other: {
+    bg: "#88888822",
+    border: "#888888",
+    text: "#888888"
+  }
+};
+var SEED = [{
+  "id": 1009,
+  "store": "Wegmans",
+  "date": "2026-03-02",
+  "total": 181.00,
+  "analysis": "",
+  "items": [{
+    "name": "Fresh Cilantro",
+    "category": "Produce",
+    "price": 1.19
+  }, {
+    "name": "Wegmans Organic Ground Turkey",
+    "category": "Protein",
+    "price": 9.19
+  }, {
+    "name": "Wegmans Baby Spinach Salad",
+    "category": "Produce",
+    "price": 2.59
+  }, {
+    "name": "Wegmans Boneless Skinless Chicken Breast",
+    "category": "Protein",
+    "price": 17.27
+  }, {
+    "name": "Wegmans Fresh Atlantic Salmon Fillet",
+    "category": "Protein",
+    "price": 12.28
+  }, {
+    "name": "Good Culture Cottage Cheese",
+    "category": "Dairy",
+    "price": 4.59
+  }, {
+    "name": "Applegate Organics Turkey Bacon",
+    "category": "Protein",
+    "price": 7.29
+  }, {
+    "name": "Wegmans Microwaveable Asparagus Tips",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Broccoli Crowns",
+    "category": "Produce",
+    "price": 7.29
+  }, {
+    "name": "Wegmans Feta Cheese Crumbled",
+    "category": "Dairy",
+    "price": 5.19
+  }, {
+    "name": "Wegmans Onions Yellow",
+    "category": "Produce",
+    "price": 2.29
+  }, {
+    "name": "Fage Total Yogurt Nonfat Greek",
+    "category": "Dairy",
+    "price": 1.99
+  }, {
+    "name": "Wegmans Mini Seedless Cucumbers",
+    "category": "Produce",
+    "price": 3.49
+  }, {
+    "name": "Wegmans Lemon Sparkling Water 12pk",
+    "category": "Beverages",
+    "price": 5.19
+  }, {
+    "name": "Wegmans Chicken Thighs Boneless",
+    "category": "Protein",
+    "price": 10.45
+  }, {
+    "name": "Wegmans Liquid Egg Whites",
+    "category": "Dairy",
+    "price": 6.89
+  }, {
+    "name": "Wegmans Organic Ginger",
+    "category": "Produce",
+    "price": 3.49
+  }, {
+    "name": "Blueberries",
+    "category": "Produce",
+    "price": 5.19
+  }, {
+    "name": "Green Squash Zucchini",
+    "category": "Produce",
+    "price": 3.30
+  }, {
+    "name": "Wegmans Campari Cocktail Tomatoes",
+    "category": "Produce",
+    "price": 4.99
+  }, {
+    "name": "Serrano Peppers",
+    "category": "Produce",
+    "price": 0.78
+  }, {
+    "name": "Wegmans Pitted Kalamata Olives",
+    "category": "Pantry",
+    "price": 4.09
+  }, {
+    "name": "Wegmans Grade AA Large Eggs",
+    "category": "Dairy",
+    "price": 3.49
+  }, {
+    "name": "Wegmans Mixed Peppers 6 Pack",
+    "category": "Produce",
+    "price": 8.09
+  }, {
+    "name": "Wegmans Potatoes Baby Medley",
+    "category": "Produce",
+    "price": 5.79
+  }]
+}, {
+  "id": 1001,
+  "store": "Wegmans",
+  "date": "2026-03-02",
+  "total": 180.31,
+  "analysis": "",
+  "items": [{
+    "name": "Green Squash Zucchini",
+    "category": "Produce",
+    "price": 1.38
+  }, {
+    "name": "Wegmans Grade AA Large Eggs",
+    "category": "Dairy",
+    "price": 3.49
+  }, {
+    "name": "Wegmans Organic Turkey Breast",
+    "category": "Protein",
+    "price": 7.61
+  }, {
+    "name": "Good Culture Cottage Cheese",
+    "category": "Dairy",
+    "price": 4.59
+  }, {
+    "name": "Kodiak Power Waffles",
+    "category": "Pantry",
+    "price": 6.89
+  }, {
+    "name": "Wegmans Fresh Atlantic Salmon Fillet",
+    "category": "Protein",
+    "price": 21.96
+  }, {
+    "name": "Wegmans Organic Mini Cucumbers",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Extra Large Green Peppers",
+    "category": "Produce",
+    "price": 1.36
+  }, {
+    "name": "Wegmans Granny Smith Apples",
+    "category": "Produce",
+    "price": 5.79
+  }, {
+    "name": "Strawberries",
+    "category": "Produce",
+    "price": 6.39
+  }, {
+    "name": "Tru Fru Strawberries Chocolate",
+    "category": "Snacks",
+    "price": 8.99
+  }, {
+    "name": "Wegmans Ground Chicken 3 Pack",
+    "category": "Protein",
+    "price": 13.79
+  }, {
+    "name": "Wegmans Organic Chicken Sausage",
+    "category": "Protein",
+    "price": 8.09
+  }, {
+    "name": "Wegmans Avocados Bagged",
+    "category": "Produce",
+    "price": 3.49
+  }, {
+    "name": "Wegmans Lemon Sparkling Water 12pk",
+    "category": "Beverages",
+    "price": 5.19
+  }, {
+    "name": "Wegmans Frozen Mukimame Soybeans",
+    "category": "Frozen",
+    "price": 2.89
+  }, {
+    "name": "Wegmans Organic Sweet Potatoes",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Wegmans Spicy Red Pepper Hummus",
+    "category": "Pantry",
+    "price": 3.49
+  }, {
+    "name": "Wegmans Tzatziki Dip",
+    "category": "Pantry",
+    "price": 4.09
+  }, {
+    "name": "Mina Harissa Sauce",
+    "category": "Pantry",
+    "price": 8.09
+  }, {
+    "name": "Wegmans Asian Slaw",
+    "category": "Produce",
+    "price": 4.09
+  }, {
+    "name": "Polar Chestnuts Sliced Water",
+    "category": "Pantry",
+    "price": 2.89
+  }, {
+    "name": "Polar Bamboo Shoots",
+    "category": "Pantry",
+    "price": 2.89
+  }, {
+    "name": "Applegate Organics Turkey Bacon",
+    "category": "Protein",
+    "price": 7.29
+  }, {
+    "name": "Wegmans Broccoletti",
+    "category": "Produce",
+    "price": 6.09
+  }, {
+    "name": "Wegmans Organic Ginger",
+    "category": "Produce",
+    "price": 3.49
+  }, {
+    "name": "Bulk Garlic",
+    "category": "Produce",
+    "price": 1.51
+  }, {
+    "name": "Josephs Pita Bread",
+    "category": "Pantry",
+    "price": 2.89
+  }]
+}, {
+  "id": 1008,
+  "store": "Wegmans",
+  "date": "2026-02-21",
+  "total": 130.07,
+  "analysis": "",
+  "items": [{
+    "name": "Wegmans Fresh Atlantic Salmon",
+    "category": "Protein",
+    "price": 19.58
+  }, {
+    "name": "Morton Bassett Red Chili Flakes",
+    "category": "Pantry",
+    "price": 8.69
+  }, {
+    "name": "Wegmans Cod Loin Iceland",
+    "category": "Protein",
+    "price": 23.32
+  }, {
+    "name": "Avocado",
+    "category": "Produce",
+    "price": 2.38
+  }, {
+    "name": "Traditional Medicinals Spearmint Tea",
+    "category": "Beverages",
+    "price": 6.89
+  }, {
+    "name": "Tru Fru Frozen Cherries Chocolate",
+    "category": "Frozen",
+    "price": 8.99
+  }, {
+    "name": "Mother In Laws Kimchi",
+    "category": "Pantry",
+    "price": 11.49
+  }, {
+    "name": "Wegmans Organic Mini Cucumbers",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Tomatoes On-The-Vine",
+    "category": "Produce",
+    "price": 3.15
+  }, {
+    "name": "Granny Smith Apple",
+    "category": "Produce",
+    "price": 5.49
+  }, {
+    "name": "Wegmans Spaghetti Squash Halved",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Wegmans Organic Frozen Blueberries",
+    "category": "Frozen",
+    "price": 18.36
+  }]
+}, {
+  "id": 1007,
+  "store": "Wegmans",
+  "date": "2026-02-18",
+  "total": 208.60,
+  "analysis": "",
+  "items": [{
+    "name": "fairlife 2% Reduced Fat Milk",
+    "category": "Dairy",
+    "price": 6.39
+  }, {
+    "name": "Fage Total Yogurt Nonfat Greek",
+    "category": "Dairy",
+    "price": 9.19
+  }, {
+    "name": "MorningStar Farms Grillers Burgers",
+    "category": "Frozen",
+    "price": 8.89
+  }, {
+    "name": "Wegmans Organic Sourdough Bread",
+    "category": "Pantry",
+    "price": 6.89
+  }, {
+    "name": "Wegmans Chicken Thighs Boneless",
+    "category": "Protein",
+    "price": 20.18
+  }, {
+    "name": "Wegmans Ground Chicken",
+    "category": "Protein",
+    "price": 12.38
+  }, {
+    "name": "Wegmans Fresh Atlantic Salmon Fillet",
+    "category": "Protein",
+    "price": 14.18
+  }, {
+    "name": "Wegmans Organic Chicken Sausage",
+    "category": "Protein",
+    "price": 8.09
+  }, {
+    "name": "Wegmans Liquid Egg Whites",
+    "category": "Dairy",
+    "price": 6.89
+  }, {
+    "name": "Wegmans Grade AA Large Eggs",
+    "category": "Dairy",
+    "price": 3.49
+  }, {
+    "name": "Wegmans Microwaveable Asparagus",
+    "category": "Produce",
+    "price": 4.09
+  }, {
+    "name": "Wegmans Organic Baby Spinach",
+    "category": "Produce",
+    "price": 3.79
+  }, {
+    "name": "Wegmans Mini Seedless Cucumbers",
+    "category": "Produce",
+    "price": 3.49
+  }, {
+    "name": "Wegmans Onions Red",
+    "category": "Produce",
+    "price": 3.49
+  }, {
+    "name": "Wegmans Peeled Garlic Family Pack",
+    "category": "Produce",
+    "price": 5.79
+  }, {
+    "name": "Wegmans Limes Bagged",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Wegmans Lemons Bagged",
+    "category": "Produce",
+    "price": 5.79
+  }, {
+    "name": "Iceberg Lettuce",
+    "category": "Produce",
+    "price": 2.29
+  }, {
+    "name": "Good Culture Cottage Cheese",
+    "category": "Dairy",
+    "price": 4.59
+  }, {
+    "name": "Wegmans Lemon Sparkling Water 12pk",
+    "category": "Beverages",
+    "price": 4.19
+  }, {
+    "name": "Cocojune Yogurt Vanilla Cinnamon",
+    "category": "Dairy",
+    "price": 2.99
+  }, {
+    "name": "Wegmans Broccoli Cauliflower Florets",
+    "category": "Produce",
+    "price": 3.29
+  }, {
+    "name": "Wegmans Sweet Potato Microwaveable",
+    "category": "Produce",
+    "price": 1.79
+  }, {
+    "name": "Wegmans Baby Gold Potatoes",
+    "category": "Produce",
+    "price": 9.18
+  }, {
+    "name": "Blackberries Family Pack",
+    "category": "Produce",
+    "price": 6.89
+  }, {
+    "name": "Fresh Ginger",
+    "category": "Produce",
+    "price": 1.23
+  }]
+}, {
+  "id": 1002,
+  "store": "Wegmans",
+  "date": "2025-12-07",
+  "total": 150.04,
+  "analysis": "",
+  "items": [{
+    "name": "Wegmans Ground Chicken 3 Pack",
+    "category": "Protein",
+    "price": 13.79
+  }, {
+    "name": "Fresh Cilantro",
+    "category": "Produce",
+    "price": 1.19
+  }, {
+    "name": "Wegmans Limes Bagged",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Wegmans Fresh Atlantic Salmon Fillet",
+    "category": "Protein",
+    "price": 24.21
+  }, {
+    "name": "Wegmans Mixed Peppers 6 Pack",
+    "category": "Produce",
+    "price": 8.09
+  }, {
+    "name": "Wegmans Orzo Pasta",
+    "category": "Pantry",
+    "price": 1.19
+  }, {
+    "name": "Wegmans Chicken Sausage Sundried Tomato",
+    "category": "Protein",
+    "price": 6.39
+  }, {
+    "name": "BelGioioso Parmesan Cheese Grated",
+    "category": "Dairy",
+    "price": 5.79
+  }, {
+    "name": "Wegmans Baby Spinach Salad",
+    "category": "Produce",
+    "price": 2.59
+  }, {
+    "name": "Bobs Red Mill Potato Starch",
+    "category": "Pantry",
+    "price": 6.39
+  }, {
+    "name": "Wegmans Microwaveable Asparagus",
+    "category": "Produce",
+    "price": 4.09
+  }, {
+    "name": "Wegmans Baby Gold Potatoes",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Veggies Made Great Chocolate Muffins",
+    "category": "Snacks",
+    "price": 8.09
+  }, {
+    "name": "Wegmans Granny Smith Apples",
+    "category": "Produce",
+    "price": 6.89
+  }, {
+    "name": "Wegmans Thai Chili Chopped Salad Kit",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Wegmans Chicken Thighs Boneless",
+    "category": "Protein",
+    "price": 10.17
+  }, {
+    "name": "Wegmans Baby Corn",
+    "category": "Produce",
+    "price": 3.79
+  }, {
+    "name": "Ortega Taco Seasoning",
+    "category": "Pantry",
+    "price": 1.49
+  }, {
+    "name": "McCormick Taco Seasoning Mix",
+    "category": "Pantry",
+    "price": 3.58
+  }, {
+    "name": "Josephs Mini Oat Bran Pita Bread",
+    "category": "Pantry",
+    "price": 4.09
+  }, {
+    "name": "Wegmans Peeled Garlic Family Pack",
+    "category": "Produce",
+    "price": 5.79
+  }]
+}, {
+  "id": 1003,
+  "store": "Wegmans",
+  "date": "2026-01-04",
+  "total": 162.98,
+  "analysis": "",
+  "items": [{
+    "name": "Wegmans Baby Spinach Salad",
+    "category": "Produce",
+    "price": 2.59
+  }, {
+    "name": "Wegmans Ground Chicken",
+    "category": "Protein",
+    "price": 6.19
+  }, {
+    "name": "Wegmans Bagged Clementines",
+    "category": "Produce",
+    "price": 6.89
+  }, {
+    "name": "Wegmans Lemons Bagged",
+    "category": "Produce",
+    "price": 5.79
+  }, {
+    "name": "Tru Fru Frozen Cherries Chocolate",
+    "category": "Frozen",
+    "price": 8.99
+  }, {
+    "name": "Wegmans Clementines Bagged",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Wegmans Organic Extra Firm Tofu",
+    "category": "Protein",
+    "price": 2.69
+  }, {
+    "name": "Wegmans Organic Mixed Peppers",
+    "category": "Produce",
+    "price": 7.49
+  }, {
+    "name": "Baby Bok Choy",
+    "category": "Produce",
+    "price": 7.76
+  }, {
+    "name": "Wegmans Organic Caprese Chicken Sausage",
+    "category": "Protein",
+    "price": 8.09
+  }, {
+    "name": "Wegmans Organic Peeled Garlic",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Wegmans Organic Beets",
+    "category": "Produce",
+    "price": 4.09
+  }, {
+    "name": "Method All-Purpose Cleaner",
+    "category": "Other",
+    "price": 6.09
+  }, {
+    "name": "Kettle Fire Turmeric Ginger Bone Broth",
+    "category": "Pantry",
+    "price": 8.69
+  }, {
+    "name": "Wegmans Chocolate Chip Cookies",
+    "category": "Snacks",
+    "price": 4.09
+  }, {
+    "name": "Wegmans Organic Mini Avocados",
+    "category": "Produce",
+    "price": 6.89
+  }, {
+    "name": "Wegmans Organic Mini Cucumbers",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Wegmans Organic Sweet Potatoes",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Red Onions",
+    "category": "Produce",
+    "price": 8.34
+  }, {
+    "name": "Wegmans Fresh Atlantic Salmon Fillet",
+    "category": "Protein",
+    "price": 7.61
+  }, {
+    "name": "Pete Gerrys Organic Eggs",
+    "category": "Dairy",
+    "price": 8.09
+  }, {
+    "name": "Wegmans Lemon Sparkling Water 12pk",
+    "category": "Beverages",
+    "price": 5.19
+  }]
+}, {
+  "id": 1004,
+  "store": "Wegmans",
+  "date": "2026-01-13",
+  "total": 125.52,
+  "analysis": "",
+  "items": [{
+    "name": "Wegmans Onions Red",
+    "category": "Produce",
+    "price": 3.49
+  }, {
+    "name": "Wegmans Southwest Chopped Salad Kit",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Wegmans Organic Extra Firm Tofu",
+    "category": "Protein",
+    "price": 2.69
+  }, {
+    "name": "Wel-Pac Edamame Shelled",
+    "category": "Frozen",
+    "price": 5.79
+  }, {
+    "name": "Blackberries",
+    "category": "Produce",
+    "price": 4.09
+  }, {
+    "name": "Wegmans Pure Ground Black Pepper",
+    "category": "Pantry",
+    "price": 5.19
+  }, {
+    "name": "Wegmans Baby Spinach Salad",
+    "category": "Produce",
+    "price": 2.59
+  }, {
+    "name": "Wegmans Granny Smith Apples",
+    "category": "Produce",
+    "price": 6.89
+  }, {
+    "name": "POM Wonderful Pomegranate Arils",
+    "category": "Produce",
+    "price": 6.89
+  }, {
+    "name": "Base Culture Simply Bread",
+    "category": "Pantry",
+    "price": 9.19
+  }, {
+    "name": "Good Culture Cottage Cheese",
+    "category": "Dairy",
+    "price": 4.59
+  }, {
+    "name": "Marine Treasures Argentine Red Shrimp",
+    "category": "Protein",
+    "price": 10.99
+  }, {
+    "name": "Wegmans Organic Ground Chicken",
+    "category": "Protein",
+    "price": 8.09
+  }, {
+    "name": "Hals New York Lemon Seltzer",
+    "category": "Beverages",
+    "price": 6.89
+  }, {
+    "name": "Yams Sweet Potatoes",
+    "category": "Produce",
+    "price": 5.03
+  }, {
+    "name": "Wegmans Cole Slaw",
+    "category": "Produce",
+    "price": 2.39
+  }, {
+    "name": "Fresh Ginger",
+    "category": "Produce",
+    "price": 2.13
+  }, {
+    "name": "Broccoli Crowns",
+    "category": "Produce",
+    "price": 3.34
+  }, {
+    "name": "Wegmans Fresh Atlantic Salmon Fillet",
+    "category": "Protein",
+    "price": 13.14
+  }]
+}, {
+  "id": 1005,
+  "store": "Wegmans",
+  "date": "2026-01-24",
+  "total": 171.98,
+  "analysis": "",
+  "items": [{
+    "name": "Wegmans Organic Unsalted Butter",
+    "category": "Dairy",
+    "price": 7.49
+  }, {
+    "name": "Fage Total Yogurt Nonfat Greek",
+    "category": "Dairy",
+    "price": 9.19
+  }, {
+    "name": "Organic Bananas Bunch",
+    "category": "Produce",
+    "price": 2.77
+  }, {
+    "name": "Wegmans Fresh Atlantic Salmon Fillet",
+    "category": "Protein",
+    "price": 22.48
+  }, {
+    "name": "Wegmans Chicken Thighs Boneless",
+    "category": "Protein",
+    "price": 9.17
+  }, {
+    "name": "Wegmans Cleaned Cut Leeks",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Wegmans Onions Red",
+    "category": "Produce",
+    "price": 3.49
+  }, {
+    "name": "Wegmans Organic Carrots",
+    "category": "Produce",
+    "price": 1.79
+  }, {
+    "name": "Wegmans Microwaveable Asparagus",
+    "category": "Produce",
+    "price": 4.09
+  }, {
+    "name": "Wegmans Organic Sweet Potatoes",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Wegmans Boneless Skinless Chicken Breast",
+    "category": "Protein",
+    "price": 10.27
+  }, {
+    "name": "Wegmans Granny Smith Apples",
+    "category": "Produce",
+    "price": 6.89
+  }, {
+    "name": "Koia Shake Cold Brew Coffee",
+    "category": "Beverages",
+    "price": 4.99
+  }, {
+    "name": "Koia Protein Cacao Bean Shake",
+    "category": "Beverages",
+    "price": 4.99
+  }, {
+    "name": "Wegmans Amore Orecchiette Pasta",
+    "category": "Pantry",
+    "price": 5.79
+  }, {
+    "name": "Cocojune Cultured Coconut Yogurt",
+    "category": "Dairy",
+    "price": 5.78
+  }, {
+    "name": "Fresh Nappa Cabbage",
+    "category": "Produce",
+    "price": 9.04
+  }, {
+    "name": "Wegmans Baby Medley Potatoes",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Long Hot Green Pepper",
+    "category": "Produce",
+    "price": 2.16
+  }, {
+    "name": "Wegmans Mini Sweet Peppers",
+    "category": "Produce",
+    "price": 8.09
+  }, {
+    "name": "Empire Kosher Ground Turkey",
+    "category": "Protein",
+    "price": 6.39
+  }]
+}, {
+  "id": 1006,
+  "store": "Wegmans",
+  "date": "2026-02-01",
+  "total": 198.82,
+  "analysis": "",
+  "items": [{
+    "name": "Wegmans Boneless Skinless Chicken Breast",
+    "category": "Protein",
+    "price": 7.92
+  }, {
+    "name": "Landhaus Butterkase Cheese",
+    "category": "Dairy",
+    "price": 9.86
+  }, {
+    "name": "Wegmans Chicken Thighs Boneless",
+    "category": "Protein",
+    "price": 8.16
+  }, {
+    "name": "Wegmans Fresh Atlantic Salmon",
+    "category": "Protein",
+    "price": 19.58
+  }, {
+    "name": "Wegmans Microwaveable Asparagus",
+    "category": "Produce",
+    "price": 4.09
+  }, {
+    "name": "Wegmans Potatoes Baby Medley",
+    "category": "Produce",
+    "price": 5.79
+  }, {
+    "name": "Wegmans Organic Toasted Sesame Salad Kit",
+    "category": "Produce",
+    "price": 5.79
+  }, {
+    "name": "Wegmans Lemons Bagged",
+    "category": "Produce",
+    "price": 5.79
+  }, {
+    "name": "Wegmans Sweet Potato Microwaveable",
+    "category": "Produce",
+    "price": 3.58
+  }, {
+    "name": "Wegmans Organic White Rice Noodles",
+    "category": "Pantry",
+    "price": 3.49
+  }, {
+    "name": "Wegmans Cilantro Jalapeno Hummus",
+    "category": "Pantry",
+    "price": 2.79
+  }, {
+    "name": "Good Culture Cottage Cheese",
+    "category": "Dairy",
+    "price": 4.59
+  }, {
+    "name": "Blackberries Family Pack",
+    "category": "Produce",
+    "price": 6.89
+  }, {
+    "name": "Serrano Peppers",
+    "category": "Produce",
+    "price": 1.97
+  }, {
+    "name": "Fresh Cilantro",
+    "category": "Produce",
+    "price": 1.19
+  }, {
+    "name": "Wegmans Organic Sourdough Bread",
+    "category": "Pantry",
+    "price": 6.89
+  }, {
+    "name": "Wegmans Organic Baby Spinach",
+    "category": "Produce",
+    "price": 3.79
+  }, {
+    "name": "Wegmans Oven Roasted Turkey Breast",
+    "category": "Protein",
+    "price": 8.51
+  }, {
+    "name": "Wegmans Clementines Bagged",
+    "category": "Produce",
+    "price": 4.59
+  }, {
+    "name": "Nature Valley Sweet Salty Granola Bars",
+    "category": "Snacks",
+    "price": 4.59
+  }, {
+    "name": "Ore-Ida Crispy Hash Brown Patties",
+    "category": "Frozen",
+    "price": 5.29
+  }, {
+    "name": "Wegmans Mild Italian Chicken Sausage",
+    "category": "Protein",
+    "price": 6.39
+  }, {
+    "name": "Wegmans Organic Uncured Turkey Bacon",
+    "category": "Protein",
+    "price": 8.39
+  }, {
+    "name": "MorningStar Farms Chikn Nuggets",
+    "category": "Frozen",
+    "price": 10.39
+  }, {
+    "name": "Wegmans Organic Sweet Basil",
+    "category": "Produce",
+    "price": 5.79
+  }, {
+    "name": "Wegmans Garlic 5 Count Family Pack",
+    "category": "Produce",
+    "price": 1.79
+  }, {
+    "name": "Wegmans Mini Seedless Cucumbers",
+    "category": "Produce",
+    "price": 3.49
+  }]
+}];
+function useIsMobile() {
+  var _useState = useState(window.innerWidth < 640),
+    _useState2 = _slicedToArray(_useState, 2),
+    mobile = _useState2[0],
+    setMobile = _useState2[1];
+  useEffect(function () {
+    var h = function h() {
+      return setMobile(window.innerWidth < 640);
+    };
+    window.addEventListener("resize", h);
+    return function () {
+      return window.removeEventListener("resize", h);
+    };
+  }, []);
+  return mobile;
+}
+function Pill(_ref) {
+  var label = _ref.label;
+  var c = TAG[label] || TAG["Other"];
+  return /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: c.bg,
+      border: "1px solid ".concat(c.border),
+      color: c.text,
+      borderRadius: 20,
+      padding: "2px 10px",
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: 0.5
+    }
+  }, label);
+}
+function btnStyle(bg) {
+  var color = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "#000";
+  return {
+    background: bg,
+    color: color,
+    border: "2px solid ".concat(bg),
+    borderRadius: 12,
+    padding: "10px 20px",
+    fontWeight: 700,
+    fontSize: 14,
+    cursor: "pointer",
+    letterSpacing: 0.3
+  };
+}
+function callClaude(_x, _x2) {
+  return _callClaude.apply(this, arguments);
+}
+function _callClaude() {
+  _callClaude = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9(messages, system) {
+    var _d$content2;
+    var res, d;
+    return _regenerator().w(function (_context9) {
+      while (1) switch (_context9.n) {
+        case 0:
+          _context9.n = 1;
+          return fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              model: "claude-sonnet-4-20250514",
+              max_tokens: 1000,
+              system: system,
+              messages: messages
+            })
+          });
+        case 1:
+          res = _context9.v;
+          _context9.n = 2;
+          return res.json();
+        case 2:
+          d = _context9.v;
+          return _context9.a(2, ((_d$content2 = d.content) === null || _d$content2 === void 0 || (_d$content2 = _d$content2[0]) === null || _d$content2 === void 0 ? void 0 : _d$content2.text) || "");
+      }
+    }, _callee9);
+  }));
+  return _callClaude.apply(this, arguments);
+}
+function callClaudeSearch(_x3, _x4) {
+  return _callClaudeSearch.apply(this, arguments);
+}
+function _callClaudeSearch() {
+  _callClaudeSearch = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0(messages, system) {
+    var _d$content3;
+    var res, d;
+    return _regenerator().w(function (_context0) {
+      while (1) switch (_context0.n) {
+        case 0:
+          _context0.n = 1;
+          return fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              model: "claude-sonnet-4-20250514",
+              max_tokens: 1000,
+              system: system,
+              tools: [{
+                type: "web_search_20250305",
+                name: "web_search"
+              }],
+              messages: messages
+            })
+          });
+        case 1:
+          res = _context0.v;
+          _context0.n = 2;
+          return res.json();
+        case 2:
+          d = _context0.v;
+          return _context0.a(2, ((_d$content3 = d.content) === null || _d$content3 === void 0 || (_d$content3 = _d$content3.find(function (b) {
+            return b.type === "text";
+          })) === null || _d$content3 === void 0 ? void 0 : _d$content3.text) || "");
+      }
+    }, _callee0);
+  }));
+  return _callClaudeSearch.apply(this, arguments);
+}
+function fileToBase64(_x5) {
+  return _fileToBase.apply(this, arguments);
+}
+function _fileToBase() {
+  _fileToBase = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(file) {
+    return _regenerator().w(function (_context1) {
+      while (1) switch (_context1.n) {
+        case 0:
+          return _context1.a(2, new Promise(function (res, rej) {
+            var r = new FileReader();
+            r.onload = function () {
+              return res(r.result.split(",")[1]);
+            };
+            r.onerror = function () {
+              return rej(new Error("fail"));
+            };
+            r.readAsDataURL(file);
+          }));
+      }
+    }, _callee1);
+  }));
+  return _fileToBase.apply(this, arguments);
+}
+function parseReceipt(_x6, _x7, _x8) {
+  return _parseReceipt.apply(this, arguments);
+}
+function _parseReceipt() {
+  _parseReceipt = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee10(input, store, isFile) {
+    var sys, msgs, _input$name, b64, isPdf, mt, raw, start, end, jsonStr, fixPrompt, fixed, fs, fe, _t11;
+    return _regenerator().w(function (_context10) {
+      while (1) switch (_context10.p = _context10.n) {
+        case 0:
+          sys = "You are a grocery receipt parser. Extract every line item. Return ONLY valid JSON with no markdown, no backticks, no extra text before or after.\nFormat: {\"date\":\"YYYY-MM-DD\",\"store\":\"".concat(store, "\",\"total\":0.00,\"items\":[{\"name\":\"Item Name\",\"category\":\"Protein|Produce|Dairy|Pantry|Snacks|Beverages|Frozen|Other\",\"price\":0.00,\"quantity\":1}]}");
+          if (!isFile) {
+            _context10.n = 2;
+            break;
+          }
+          _context10.n = 1;
+          return fileToBase64(input);
+        case 1:
+          b64 = _context10.v;
+          isPdf = input.type === "application/pdf" || ((_input$name = input.name) === null || _input$name === void 0 ? void 0 : _input$name.endsWith(".pdf"));
+          if (isPdf) {
+            // PDFs: send as document type
+            msgs = [{
+              role: "user",
+              content: [{
+                type: "document",
+                source: {
+                  type: "base64",
+                  media_type: "application/pdf",
+                  data: b64
+                }
+              }, {
+                type: "text",
+                text: "This is a grocery receipt PDF. Extract all line items and return JSON only."
+              }]
+            }];
+          } else {
+            // Images
+            mt = input.type || "image/jpeg";
+            msgs = [{
+              role: "user",
+              content: [{
+                type: "image",
+                source: {
+                  type: "base64",
+                  media_type: mt,
+                  data: b64
+                }
+              }, {
+                type: "text",
+                text: "This is a grocery receipt image. Extract all line items and return JSON only."
+              }]
+            }];
+          }
+          _context10.n = 3;
+          break;
+        case 2:
+          msgs = [{
+            role: "user",
+            content: "Parse this grocery receipt and return JSON only:\n\n".concat(input)
+          }];
+        case 3:
+          _context10.n = 4;
+          return callClaude(msgs, sys);
+        case 4:
+          raw = _context10.v;
+          // Extract JSON from response — find first { to last }
+          start = raw.indexOf("{");
+          end = raw.lastIndexOf("}");
+          if (!(start === -1 || end === -1)) {
+            _context10.n = 5;
+            break;
+          }
+          throw new Error("No JSON in response: " + raw.slice(0, 200));
+        case 5:
+          jsonStr = raw.slice(start, end + 1); // Fix unescaped apostrophes inside JSON string values (e.g. Pete & Gerry's)
+          // Replace curly/smart quotes with straight quotes
+          jsonStr = jsonStr.replace(/[‘’]/g, "\'").replace(/[“”]/g, '\"');
+          _context10.p = 6;
+          return _context10.a(2, JSON.parse(jsonStr));
+        case 7:
+          _context10.p = 7;
+          _t11 = _context10.v;
+          // Ask Claude to fix its own JSON
+          fixPrompt = "This JSON has a syntax error. Fix it and return ONLY valid JSON, nothing else:\n".concat(jsonStr);
+          _context10.n = 8;
+          return callClaude([{
+            role: "user",
+            content: fixPrompt
+          }], "You are a JSON fixer. Return only valid JSON.");
+        case 8:
+          fixed = _context10.v;
+          fs = fixed.indexOf("{");
+          fe = fixed.lastIndexOf("}");
+          if (!(fs === -1 || fe === -1)) {
+            _context10.n = 9;
+            break;
+          }
+          throw new Error("Could not fix JSON");
+        case 9:
+          return _context10.a(2, JSON.parse(fixed.slice(fs, fe + 1)));
+      }
+    }, _callee10, null, [[6, 7]]);
+  }));
+  return _parseReceipt.apply(this, arguments);
+}
+function analyzeOrder(_x9, _x0) {
+  return _analyzeOrder.apply(this, arguments);
+}
+function _analyzeOrder() {
+  _analyzeOrder = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee11(order, allOrders) {
+    var others, avg, ctx, prompt;
+    return _regenerator().w(function (_context11) {
+      while (1) switch (_context11.n) {
+        case 0:
+          others = allOrders.filter(function (o) {
+            return o.id !== order.id;
+          });
+          avg = others.length > 0 ? others.reduce(function (s, o) {
+            return s + o.total;
+          }, 0) / others.length : null;
+          ctx = avg ? "Average spend (excluding this): $".concat(avg.toFixed(2), ".") : "This is the first order.";
+          prompt = "".concat(ctx, "\n\nOrder from ").concat(order.store, " on ").concat(order.date, ": $").concat(order.total.toFixed(2), "\nItems:\n").concat(order.items.map(function (i) {
+            return "- ".concat(i.name, " (").concat(i.category, "): $").concat(i.price.toFixed(2));
+          }).join("\n"), "\n\nWrite a SHORT, friendly 2-3 sentence analysis. Be specific about actual items. Keep it casual.");
+          return _context11.a(2, callClaude([{
+            role: "user",
+            content: prompt
+          }], "You are a friendly grocery budget analyst. Be short and specific."));
+      }
+    }, _callee11);
+  }));
+  return _analyzeOrder.apply(this, arguments);
+}
+function estimateMealPlan(_x1, _x10) {
+  return _estimateMealPlan.apply(this, arguments);
+}
+function _estimateMealPlan() {
+  _estimateMealPlan = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee12(text, history) {
+    var hist, raw, parsed, _iterator, _step, item, r, m, _t12, _t13;
+    return _regenerator().w(function (_context12) {
+      while (1) switch (_context12.p = _context12.n) {
+        case 0:
+          hist = history.length > 0 ? "Historical prices:\n".concat(history.flatMap(function (o) {
+            return o.items.map(function (i) {
+              return "".concat(i.name, " at ").concat(o.store, ": $").concat(i.price.toFixed(2));
+            });
+          }).join("\n")) : "No history yet.";
+          _context12.n = 1;
+          return callClaude([{
+            role: "user",
+            content: "".concat(hist, "\n\nMeal plan:\n").concat(text, "\n\nExtract all ingredients. Return ONLY JSON:\n{\"items\":[{\"name\":\"\",\"category\":\"\",\"estimated_price\":0.00,\"from_history\":true,\"needs_lookup\":false,\"preferred_store\":\"\"}],\"recommended_store\":\"\",\"store_reasoning\":\"\"}")
+          }], "You are a grocery cost estimator. Return only valid JSON.");
+        case 1:
+          raw = _context12.v;
+          parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
+          _iterator = _createForOfIteratorHelper(parsed.items.filter(function (i) {
+            return i.needs_lookup;
+          }));
+          _context12.p = 2;
+          _iterator.s();
+        case 3:
+          if ((_step = _iterator.n()).done) {
+            _context12.n = 8;
+            break;
+          }
+          item = _step.value;
+          _context12.p = 4;
+          _context12.n = 5;
+          return callClaudeSearch([{
+            role: "user",
+            content: "Current price of \"".concat(item.name, "\" at ").concat(parsed.recommended_store || "Wegmans", "? Just the dollar amount.")
+          }], "Return only a price like: 4.99");
+        case 5:
+          r = _context12.v;
+          m = r.match(/\d+\.\d{2}|\d+/);
+          if (m) {
+            item.estimated_price = parseFloat(m[0]);
+            item.from_search = true;
+            item.needs_lookup = false;
+          }
+          _context12.n = 7;
+          break;
+        case 6:
+          _context12.p = 6;
+          _t12 = _context12.v;
+          item.estimated_price = item.estimated_price || 3.99;
+        case 7:
+          _context12.n = 3;
+          break;
+        case 8:
+          _context12.n = 10;
+          break;
+        case 9:
+          _context12.p = 9;
+          _t13 = _context12.v;
+          _iterator.e(_t13);
+        case 10:
+          _context12.p = 10;
+          _iterator.f();
+          return _context12.f(10);
+        case 11:
+          return _context12.a(2, parsed);
+      }
+    }, _callee12, null, [[4, 6], [2, 9, 10, 11]]);
+  }));
+  return _estimateMealPlan.apply(this, arguments);
+}
+function UploadZone(_ref2) {
+  var onFile = _ref2.onFile,
+    onText = _ref2.onText,
+    label = _ref2.label,
+    accept = _ref2.accept,
+    placeholder = _ref2.placeholder;
+  var _useState3 = useState(false),
+    _useState4 = _slicedToArray(_useState3, 2),
+    dragging = _useState4[0],
+    setDragging = _useState4[1];
+  var _useState5 = useState(""),
+    _useState6 = _slicedToArray(_useState5, 2),
+    text = _useState6[0],
+    setText = _useState6[1];
+  var ref = useRef();
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: function onClick() {
+      return ref.current.click();
+    },
+    onDragOver: function onDragOver(e) {
+      e.preventDefault();
+      setDragging(true);
+    },
+    onDragLeave: function onDragLeave() {
+      return setDragging(false);
+    },
+    onDrop: function onDrop(e) {
+      e.preventDefault();
+      setDragging(false);
+      var f = e.dataTransfer.files[0];
+      if (f) onFile(f);
+    },
+    style: {
+      border: "2px dashed ".concat(dragging ? C.lime : C.border),
+      borderRadius: 16,
+      padding: "28px 20px",
+      textAlign: "center",
+      cursor: "pointer",
+      background: dragging ? "#C8F13508" : "transparent"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 32,
+      marginBottom: 8
+    }
+  }, "\uD83D\uDCCE"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: C.text,
+      fontWeight: 600,
+      fontSize: 14
+    }
+  }, label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: C.muted,
+      fontSize: 12,
+      marginTop: 4
+    }
+  }, "PDF, image, or screenshot"), /*#__PURE__*/React.createElement("input", {
+    ref: ref,
+    type: "file",
+    accept: accept,
+    style: {
+      display: "none"
+    },
+    onChange: function onChange(e) {
+      if (e.target.files[0]) onFile(e.target.files[0]);
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      color: C.muted,
+      fontSize: 12
+    }
+  }, "\u2014 or paste text below \u2014"), /*#__PURE__*/React.createElement("textarea", {
+    value: text,
+    onChange: function onChange(e) {
+      return setText(e.target.value);
+    },
+    placeholder: placeholder,
+    rows: 5,
+    style: {
+      background: C.card,
+      border: "1px solid ".concat(C.border),
+      borderRadius: 12,
+      color: C.text,
+      padding: "12px 16px",
+      fontSize: 13,
+      resize: "vertical",
+      fontFamily: "monospace",
+      outline: "none",
+      lineHeight: 1.6
+    }
+  }), text.trim() && /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      onText(text);
+      setText("");
+    },
+    style: btnStyle(C.lime, "#000")
+  }, "Process Text \u2192"));
+}
+function App() {
+  var isMobile = useIsMobile();
+  var _useState7 = useState("dashboard"),
+    _useState8 = _slicedToArray(_useState7, 2),
+    tab = _useState8[0],
+    setTab = _useState8[1];
+  var _useState9 = useState([]),
+    _useState0 = _slicedToArray(_useState9, 2),
+    orders = _useState0[0],
+    setOrders = _useState0[1];
+  var _useState1 = useState(DEFAULT_BUDGET),
+    _useState10 = _slicedToArray(_useState1, 2),
+    budget = _useState10[0],
+    setBudget = _useState10[1];
+  var _useState11 = useState(false),
+    _useState12 = _slicedToArray(_useState11, 2),
+    editingBudget = _useState12[0],
+    setEditingBudget = _useState12[1];
+  var _useState13 = useState(String(DEFAULT_BUDGET)),
+    _useState14 = _slicedToArray(_useState13, 2),
+    budgetInput = _useState14[0],
+    setBudgetInput = _useState14[1];
+  var _useState15 = useState(false),
+    _useState16 = _slicedToArray(_useState15, 2),
+    loading = _useState16[0],
+    setLoading = _useState16[1];
+  var _useState17 = useState(""),
+    _useState18 = _slicedToArray(_useState17, 2),
+    loadingMsg = _useState18[0],
+    setLoadingMsg = _useState18[1];
+  var _useState19 = useState(null),
+    _useState20 = _slicedToArray(_useState19, 2),
+    expanded = _useState20[0],
+    setExpanded = _useState20[1];
+  var _useState21 = useState("Wegmans"),
+    _useState22 = _slicedToArray(_useState21, 2),
+    store = _useState22[0],
+    setStore = _useState22[1];
+  var _useState23 = useState(null),
+    _useState24 = _slicedToArray(_useState23, 2),
+    estimate = _useState24[0],
+    setEstimate = _useState24[1];
+  var _useState25 = useState(null),
+    _useState26 = _slicedToArray(_useState25, 2),
+    toast = _useState26[0],
+    setToast = _useState26[1];
+  var _useState27 = useState(null),
+    _useState28 = _slicedToArray(_useState27, 2),
+    insights = _useState28[0],
+    setInsights = _useState28[1];
+  var _useState29 = useState(false),
+    _useState30 = _slicedToArray(_useState29, 2),
+    insightsLoading = _useState30[0],
+    setInsightsLoading = _useState30[1];
+  var _useState31 = useState("3mo"),
+    _useState32 = _slicedToArray(_useState31, 2),
+    donutRange = _useState32[0],
+    setDonutRange = _useState32[1]; // "1mo" | "3mo" | "all"
+  var _useState33 = useState(function () {
+      return new Date().toISOString().slice(0, 10);
+    }),
+    _useState34 = _slicedToArray(_useState33, 2),
+    orderDate = _useState34[0],
+    setOrderDate = _useState34[1];
+  var _useState35 = useState(null),
+    _useState36 = _slicedToArray(_useState35, 2),
+    confirmDelete = _useState36[0],
+    setConfirmDelete = _useState36[1]; // order id to confirm delete
+
+  var SEED_VERSION = "v3"; // bump this to force re-seed with corrected data
+
+  useEffect(function () {
+    _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+      var loaded, ver, r, p, _r, n, _r2, _t, _t2, _t3, _t4, _t5;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.p = _context.n) {
+          case 0:
+            loaded = false; // Check seed version — if outdated, force re-seed with corrected dates
+            _context.p = 1;
+            _context.n = 2;
+            return window.storage.get("seed_version");
+          case 2:
+            ver = _context.v;
+            if (!((ver === null || ver === void 0 ? void 0 : ver.value) === SEED_VERSION)) {
+              _context.n = 4;
+              break;
+            }
+            _context.n = 3;
+            return window.storage.get(STORAGE_KEY);
+          case 3:
+            r = _context.v;
+            if (r !== null && r !== void 0 && r.value) {
+              p = JSON.parse(r.value);
+              if (p.length > 0) {
+                setOrders(p);
+                loaded = true;
+              }
+            }
+          case 4:
+            _context.n = 6;
+            break;
+          case 5:
+            _context.p = 5;
+            _t = _context.v;
+          case 6:
+            if (loaded) {
+              _context.n = 13;
+              break;
+            }
+            setOrders(SEED);
+            _context.p = 7;
+            _context.n = 8;
+            return window.storage.set(STORAGE_KEY, JSON.stringify(SEED));
+          case 8:
+            _context.n = 10;
+            break;
+          case 9:
+            _context.p = 9;
+            _t2 = _context.v;
+          case 10:
+            _context.p = 10;
+            _context.n = 11;
+            return window.storage.set("seed_version", SEED_VERSION);
+          case 11:
+            _context.n = 13;
+            break;
+          case 12:
+            _context.p = 12;
+            _t3 = _context.v;
+          case 13:
+            _context.p = 13;
+            _context.n = 14;
+            return window.storage.get(BUDGET_KEY);
+          case 14:
+            _r = _context.v;
+            if (_r !== null && _r !== void 0 && _r.value) {
+              n = parseFloat(_r.value);
+              setBudget(n);
+              setBudgetInput(String(n));
+            }
+            _context.n = 16;
+            break;
+          case 15:
+            _context.p = 15;
+            _t4 = _context.v;
+          case 16:
+            _context.p = 16;
+            _context.n = 17;
+            return window.storage.get(INSIGHTS_KEY);
+          case 17:
+            _r2 = _context.v;
+            if (_r2 !== null && _r2 !== void 0 && _r2.value) setInsights(JSON.parse(_r2.value));
+            _context.n = 19;
+            break;
+          case 18:
+            _context.p = 18;
+            _t5 = _context.v;
+          case 19:
+            return _context.a(2);
+        }
+      }, _callee, null, [[16, 18], [13, 15], [10, 12], [7, 9], [1, 5]]);
+    }))();
+  }, []);
+  var save = /*#__PURE__*/function () {
+    var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(o) {
+      var _t6;
+      return _regenerator().w(function (_context2) {
+        while (1) switch (_context2.p = _context2.n) {
+          case 0:
+            setOrders(o);
+            _context2.p = 1;
+            _context2.n = 2;
+            return window.storage.set(STORAGE_KEY, JSON.stringify(o));
+          case 2:
+            _context2.n = 4;
+            break;
+          case 3:
+            _context2.p = 3;
+            _t6 = _context2.v;
+          case 4:
+            return _context2.a(2);
+        }
+      }, _callee2, null, [[1, 3]]);
+    }));
+    return function save(_x11) {
+      return _ref4.apply(this, arguments);
+    };
+  }();
+  var saveBudget = /*#__PURE__*/function () {
+    var _ref5 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(v) {
+      var n, _t7;
+      return _regenerator().w(function (_context3) {
+        while (1) switch (_context3.p = _context3.n) {
+          case 0:
+            n = parseFloat(v);
+            if (!(!isNaN(n) && n > 0)) {
+              _context3.n = 4;
+              break;
+            }
+            setBudget(n);
+            _context3.p = 1;
+            _context3.n = 2;
+            return window.storage.set(BUDGET_KEY, String(n));
+          case 2:
+            _context3.n = 4;
+            break;
+          case 3:
+            _context3.p = 3;
+            _t7 = _context3.v;
+          case 4:
+            setEditingBudget(false);
+          case 5:
+            return _context3.a(2);
+        }
+      }, _callee3, null, [[1, 3]]);
+    }));
+    return function saveBudget(_x12) {
+      return _ref5.apply(this, arguments);
+    };
+  }();
+  var showToast = function showToast(msg) {
+    var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "success";
+    setToast({
+      msg: msg,
+      type: type
+    });
+    setTimeout(function () {
+      return setToast(null);
+    }, 3000);
+  };
+  var deleteOrder = /*#__PURE__*/function () {
+    var _ref6 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(id) {
+      var updated;
+      return _regenerator().w(function (_context4) {
+        while (1) switch (_context4.n) {
+          case 0:
+            updated = orders.filter(function (o) {
+              return o.id !== id;
+            });
+            _context4.n = 1;
+            return save(updated);
+          case 1:
+            setConfirmDelete(null);
+            setExpanded(null);
+            showToast("Order removed.");
+          case 2:
+            return _context4.a(2);
+        }
+      }, _callee4);
+    }));
+    return function deleteOrder(_x13) {
+      return _ref6.apply(this, arguments);
+    };
+  }();
+  var generateInsights = /*#__PURE__*/function () {
+    var _ref7 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5() {
+      var avg, summary, prompt, _d$content, res, d, text, parsed, _t8, _t9;
+      return _regenerator().w(function (_context5) {
+        while (1) switch (_context5.p = _context5.n) {
+          case 0:
+            if (orders.length) {
+              _context5.n = 1;
+              break;
+            }
+            return _context5.a(2);
+          case 1:
+            setInsightsLoading(true);
+            avg = orders.reduce(function (s, o) {
+              return s + o.total;
+            }, 0) / orders.length;
+            summary = orders.map(function (o) {
+              return {
+                date: o.date,
+                store: o.store,
+                total: o.total,
+                items: o.items.map(function (i) {
+                  return "".concat(i.name, "($").concat(i.price.toFixed(2), ")");
+                }).join(",")
+              };
+            });
+            prompt = "You are a grocery spending analyst. Order history:\n".concat(JSON.stringify(summary, null, 2), "\n\nAverage: $").concat(avg.toFixed(2), "\n\nReturn ONLY a JSON array of 4-5 insight objects. No markdown, no backticks.\n[\n  {\"emoji\":\"\uD83D\uDC1F\",\"title\":\"Short title\",\"detail\":\"1-2 sentences with specific items/prices and a concrete suggestion.\"}\n]\nFocus on: spending drivers, volatile items, one-offs vs recurring, budget trends, easy wins.");
+            _context5.p = 2;
+            _context5.n = 3;
+            return fetch("https://api.anthropic.com/v1/messages", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                model: "claude-sonnet-4-20250514",
+                max_tokens: 1000,
+                messages: [{
+                  role: "user",
+                  content: prompt
+                }]
+              })
+            });
+          case 3:
+            res = _context5.v;
+            _context5.n = 4;
+            return res.json();
+          case 4:
+            d = _context5.v;
+            text = ((_d$content = d.content) === null || _d$content === void 0 || (_d$content = _d$content[0]) === null || _d$content === void 0 ? void 0 : _d$content.text) || "";
+            parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
+            setInsights(parsed);
+            _context5.p = 5;
+            _context5.n = 6;
+            return window.storage.set(INSIGHTS_KEY, JSON.stringify(parsed));
+          case 6:
+            _context5.n = 8;
+            break;
+          case 7:
+            _context5.p = 7;
+            _t8 = _context5.v;
+          case 8:
+            _context5.n = 10;
+            break;
+          case 9:
+            _context5.p = 9;
+            _t9 = _context5.v;
+            showToast("Couldn't generate insights.", "error");
+          case 10:
+            setInsightsLoading(false);
+          case 11:
+            return _context5.a(2);
+        }
+      }, _callee5, null, [[5, 7], [2, 9]]);
+    }));
+    return function generateInsights() {
+      return _ref7.apply(this, arguments);
+    };
+  }();
+  var handleFile = /*#__PURE__*/function () {
+    var _ref8 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(file) {
+      var p, finalDate, id, order, analysis, updated, _t0;
+      return _regenerator().w(function (_context6) {
+        while (1) switch (_context6.p = _context6.n) {
+          case 0:
+            setLoading(true);
+            setLoadingMsg("Parsing receipt...");
+            _context6.p = 1;
+            _context6.n = 2;
+            return parseReceipt(file, store, true);
+          case 2:
+            p = _context6.v;
+            finalDate = orderDate || p.date;
+            setLoadingMsg("Analyzing spend...");
+            id = Date.now();
+            order = _objectSpread(_objectSpread({}, p), {}, {
+              id: id,
+              date: finalDate
+            });
+            _context6.n = 3;
+            return analyzeOrder(order, [].concat(_toConsumableArray(orders), [order]));
+          case 3:
+            analysis = _context6.v;
+            updated = [].concat(_toConsumableArray(orders), [_objectSpread(_objectSpread({}, order), {}, {
+              analysis: analysis
+            })]).sort(function (a, b) {
+              return new Date(b.date) - new Date(a.date);
+            });
+            _context6.n = 4;
+            return save(updated);
+          case 4:
+            setExpanded(id);
+            setTab("dashboard");
+            showToast("Receipt added! 🛒");
+            _context6.n = 6;
+            break;
+          case 5:
+            _context6.p = 5;
+            _t0 = _context6.v;
+            console.error("Parse error:", _t0);
+            showToast("Parse failed: " + (_t0.message || "unknown error").slice(0, 60), "error");
+          case 6:
+            setLoading(false);
+          case 7:
+            return _context6.a(2);
+        }
+      }, _callee6, null, [[1, 5]]);
+    }));
+    return function handleFile(_x14) {
+      return _ref8.apply(this, arguments);
+    };
+  }();
+  var handleText = /*#__PURE__*/function () {
+    var _ref9 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(text) {
+      var p, finalDate, id, order, analysis, updated, _t1;
+      return _regenerator().w(function (_context7) {
+        while (1) switch (_context7.p = _context7.n) {
+          case 0:
+            setLoading(true);
+            setLoadingMsg("Parsing receipt...");
+            _context7.p = 1;
+            _context7.n = 2;
+            return parseReceipt(text, store, false);
+          case 2:
+            p = _context7.v;
+            finalDate = orderDate || p.date;
+            setLoadingMsg("Analyzing spend...");
+            id = Date.now();
+            order = _objectSpread(_objectSpread({}, p), {}, {
+              id: id,
+              date: finalDate
+            });
+            _context7.n = 3;
+            return analyzeOrder(order, [].concat(_toConsumableArray(orders), [order]));
+          case 3:
+            analysis = _context7.v;
+            updated = [].concat(_toConsumableArray(orders), [_objectSpread(_objectSpread({}, order), {}, {
+              analysis: analysis
+            })]).sort(function (a, b) {
+              return new Date(b.date) - new Date(a.date);
+            });
+            _context7.n = 4;
+            return save(updated);
+          case 4:
+            setExpanded(id);
+            setTab("dashboard");
+            showToast("Receipt added! 🛒");
+            _context7.n = 6;
+            break;
+          case 5:
+            _context7.p = 5;
+            _t1 = _context7.v;
+            showToast("Couldn't parse receipt.", "error");
+          case 6:
+            setLoading(false);
+          case 7:
+            return _context7.a(2);
+        }
+      }, _callee7, null, [[1, 5]]);
+    }));
+    return function handleText(_x15) {
+      return _ref9.apply(this, arguments);
+    };
+  }();
+  var handleMealPlan = /*#__PURE__*/function () {
+    var _ref0 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(text) {
+      var r, _t10;
+      return _regenerator().w(function (_context8) {
+        while (1) switch (_context8.p = _context8.n) {
+          case 0:
+            setLoading(true);
+            setLoadingMsg("Estimating costs...");
+            _context8.p = 1;
+            _context8.n = 2;
+            return estimateMealPlan(text, orders);
+          case 2:
+            r = _context8.v;
+            setEstimate(r);
+            showToast("Estimate ready! 🎯");
+            _context8.n = 4;
+            break;
+          case 3:
+            _context8.p = 3;
+            _t10 = _context8.v;
+            showToast("Couldn't process meal plan.", "error");
+          case 4:
+            setLoading(false);
+          case 5:
+            return _context8.a(2);
+        }
+      }, _callee8, null, [[1, 3]]);
+    }));
+    return function handleMealPlan(_x16) {
+      return _ref0.apply(this, arguments);
+    };
+  }();
+
+  // Derived
+  var now = new Date();
+  var thisMonth = orders.filter(function (o) {
+    var d = new Date(o.date);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  var thisMonthSpend = thisMonth.reduce(function (s, o) {
+    return s + o.total;
+  }, 0);
+  var budgetLeft = budget - thisMonthSpend;
+  var budgetPct = Math.min(thisMonthSpend / budget, 1);
+  var budgetColor = budgetPct > 0.9 ? C.coral : budgetPct > 0.7 ? C.orange : C.lime;
+  var avg = orders.length > 0 ? orders.reduce(function (s, o) {
+    return s + o.total;
+  }, 0) / orders.length : 0;
+  var lastMonth = orders.filter(function (o) {
+    var d = new Date(o.date);
+    return d.getMonth() === (now.getMonth() - 1 + 12) % 12 && d.getFullYear() === (now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear());
+  });
+  var lastMonthSpend = lastMonth.reduce(function (s, o) {
+    return s + o.total;
+  }, 0);
+  var momDiff = lastMonthSpend > 0 ? (thisMonthSpend - lastMonthSpend) / lastMonthSpend * 100 : null;
+
+  // Donut data filtered by range
+  var donutOrders = orders.filter(function (o) {
+    var d = new Date(o.date);
+    if (donutRange === "1mo") return d >= new Date(now.getFullYear(), now.getMonth(), 1);
+    if (donutRange === "3mo") return d >= new Date(now.getFullYear(), now.getMonth() - 3, 1);
+    return true;
+  });
+  var catTotals = {};
+  donutOrders.forEach(function (o) {
+    return o.items.forEach(function (i) {
+      catTotals[i.category] = (catTotals[i.category] || 0) + i.price;
+    });
+  });
+  var donutData = Object.entries(catTotals).map(function (_ref1) {
+    var _ref10 = _slicedToArray(_ref1, 2),
+      name = _ref10[0],
+      value = _ref10[1];
+    return {
+      name: name,
+      value: parseFloat(value.toFixed(2))
+    };
+  }).sort(function (a, b) {
+    return b.value - a.value;
+  });
+
+  // Aggregate orders by month for trend chart
+  var chartData = function () {
+    var monthly = {};
+    orders.forEach(function (o) {
+      var _o$date;
+      var key = (_o$date = o.date) === null || _o$date === void 0 ? void 0 : _o$date.slice(0, 7); // "YYYY-MM"
+      if (!key) return;
+      if (!monthly[key]) monthly[key] = {
+        month: key,
+        total: 0,
+        orders: 0
+      };
+      monthly[key].total += o.total;
+      monthly[key].orders += 1;
+    });
+    return Object.values(monthly).sort(function (a, b) {
+      return a.month.localeCompare(b.month);
+    }).map(function (m) {
+      var _m$month$split = m.month.split("-"),
+        _m$month$split2 = _slicedToArray(_m$month$split, 2),
+        yr = _m$month$split2[0],
+        mo = _m$month$split2[1];
+      var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      var label = "".concat(monthNames[parseInt(mo) - 1], "'").concat(yr.slice(2));
+      return {
+        date: label,
+        total: parseFloat(m.total.toFixed(2)),
+        orders: m.orders,
+        month: m.month
+      };
+    });
+  }();
+  var DonutTooltip = function DonutTooltip(_ref11) {
+    var active = _ref11.active,
+      payload = _ref11.payload;
+    if (!active || !(payload !== null && payload !== void 0 && payload.length)) return null;
+    var d = payload[0];
+    var color = DONUT_COLORS[d.name] || "#888";
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "#1A1A2E",
+        border: "2px solid ".concat(color),
+        borderRadius: 10,
+        padding: "8px 14px",
+        boxShadow: "0 4px 20px #00000066"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        color: color,
+        fontWeight: 800,
+        fontSize: 13
+      }
+    }, d.name), /*#__PURE__*/React.createElement("div", {
+      style: {
+        color: "#F0F0FF",
+        fontWeight: 700,
+        fontSize: 16,
+        marginTop: 2
+      }
+    }, "$", d.value.toFixed(2)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        color: "#8888AA",
+        fontSize: 11,
+        marginTop: 1
+      }
+    }, (d.value / donutOrders.reduce(function (s, o) {
+      return s + o.items.reduce(function (ss, i) {
+        return ss + i.price;
+      }, 0);
+    }, 0) * 100).toFixed(0), "% of spend"));
+  };
+  var LineTooltip = function LineTooltip(_ref12) {
+    var active = _ref12.active,
+      payload = _ref12.payload;
+    var pt = payload === null || payload === void 0 ? void 0 : payload.find(function (p) {
+      var _p$payload;
+      return (_p$payload = p.payload) === null || _p$payload === void 0 ? void 0 : _p$payload.month;
+    });
+    if (!active || !pt) return null;
+    var d = pt.payload;
+    var over = d.total > budget;
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "#1A1A2E",
+        border: "1px solid ".concat(over ? C.coral : C.border),
+        borderRadius: 10,
+        padding: "10px 14px",
+        boxShadow: "0 4px 20px #00000066"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        color: C.muted,
+        fontSize: 11,
+        marginBottom: 4
+      }
+    }, d.month), /*#__PURE__*/React.createElement("div", {
+      style: {
+        color: over ? C.coral : C.lime,
+        fontWeight: 700,
+        fontSize: 16
+      }
+    }, "$", d.total.toFixed(2)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        color: C.muted,
+        fontSize: 11,
+        marginTop: 3
+      }
+    }, d.orders, " order", d.orders !== 1 ? "s" : "", " \xB7 budget $", budget), over && /*#__PURE__*/React.createElement("div", {
+      style: {
+        color: C.coral,
+        fontSize: 11,
+        fontWeight: 700,
+        marginTop: 3
+      }
+    }, "\u26A0\uFE0F +$", (d.total - budget).toFixed(2), " over"));
+  };
+  var rangeLabels = {
+    "1mo": "This Month",
+    "3mo": "3 Months",
+    "all": "All Time"
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: "100vh",
+      background: C.bg,
+      color: C.text,
+      fontFamily: "'DM Sans','Nunito',system-ui,sans-serif",
+      paddingBottom: 80
+    }
+  }, /*#__PURE__*/React.createElement("style", null, "\n        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Space+Grotesk:wght@700;800&display=swap');\n        *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}\n        ::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:".concat(C.bg, ";} ::-webkit-scrollbar-thumb{background:").concat(C.border, ";border-radius:3px;}\n        button{transition:all 0.15s;} button:hover{opacity:0.85;}\n        @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}\n        @keyframes spin{to{transform:rotate(360deg);}}\n        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}\n      ")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "linear-gradient(135deg,#1A1A2E 0%,#16213E 100%)",
+      borderBottom: "1px solid ".concat(C.border),
+      padding: isMobile ? "14px 16px 0" : "18px 24px 0",
+      position: "sticky",
+      top: 0,
+      zIndex: 100
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 900,
+      margin: "0 auto"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 36,
+      height: 36,
+      borderRadius: 11,
+      background: "linear-gradient(135deg,".concat(C.lime, ",").concat(C.sky, ")"),
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 18
+    }
+  }, "\uD83D\uDED2"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'Space Grotesk',sans-serif",
+      fontSize: isMobile ? 18 : 21,
+      fontWeight: 800,
+      letterSpacing: -0.5
+    }
+  }, "Cart", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.lime
+    }
+  }, "IQ")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: C.muted
+    }
+  }, "your grocery brain \uD83E\uDDE0"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 2
+    }
+  }, [["dashboard", "📊", "Dashboard"], ["add", "➕", "Add Receipt"], ["estimate", "🔮", "Estimate"]].map(function (_ref13) {
+    var _ref14 = _slicedToArray(_ref13, 3),
+      id = _ref14[0],
+      icon = _ref14[1],
+      label = _ref14[2];
+    return /*#__PURE__*/React.createElement("button", {
+      key: id,
+      onClick: function onClick() {
+        return setTab(id);
+      },
+      style: {
+        background: tab === id ? C.lime : "transparent",
+        color: tab === id ? "#000" : C.muted,
+        border: "none",
+        borderRadius: "10px 10px 0 0",
+        padding: isMobile ? "9px 14px" : "9px 18px",
+        fontWeight: 700,
+        fontSize: isMobile ? 12 : 13,
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        gap: 5
+      }
+    }, /*#__PURE__*/React.createElement("span", null, icon), /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: isMobile && tab !== id ? "none" : "inline"
+      }
+    }, label));
+  })))), toast && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      top: 16,
+      right: 16,
+      zIndex: 999,
+      background: toast.type === "error" ? C.coral : C.lime,
+      color: "#000",
+      padding: "10px 18px",
+      borderRadius: 12,
+      fontWeight: 700,
+      fontSize: 13,
+      animation: "fadeUp 0.3s ease",
+      maxWidth: "calc(100vw - 32px)"
+    }
+  }, toast.msg), loading && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      inset: 0,
+      background: "#0F0F1Aee",
+      zIndex: 200,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 48,
+      height: 48,
+      borderRadius: "50%",
+      border: "4px solid ".concat(C.border),
+      borderTop: "4px solid ".concat(C.lime),
+      animation: "spin 0.8s linear infinite"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: C.muted,
+      fontSize: 14,
+      animation: "pulse 1.5s infinite"
+    }
+  }, loadingMsg)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 900,
+      margin: "0 auto",
+      padding: isMobile ? "16px 12px 0" : "24px 24px 0"
+    }
+  }, tab === "dashboard" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      animation: "fadeUp 0.35s ease"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(3,1fr)",
+      gap: 10,
+      marginBottom: 12
+    }
+  }, [{
+    label: "SPENT THIS MONTH",
+    value: "$".concat(thisMonthSpend.toFixed(2)),
+    sub: momDiff !== null ? "".concat(momDiff > 0 ? "+" : "").concat(momDiff.toFixed(0), "% vs last month") : "first month",
+    subColor: momDiff > 0 ? C.coral : C.lime
+  }, {
+    label: "BUDGET LEFT",
+    value: "$".concat(budgetLeft.toFixed(2)),
+    sub: "of $".concat(budget, " budget"),
+    subColor: budgetLeft < 0 ? C.coral : C.muted
+  }, {
+    label: "AVG PER ORDER",
+    value: "$".concat(avg.toFixed(2)),
+    sub: "".concat(orders.length, " total orders"),
+    subColor: C.muted,
+    fullWidth: isMobile
+  }].map(function (s, i) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        background: C.card,
+        borderRadius: 14,
+        border: "1px solid ".concat(C.border),
+        padding: isMobile ? "12px 14px" : "16px 18px",
+        gridColumn: s.fullWidth ? "1 / -1" : "auto"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 9,
+        fontWeight: 700,
+        color: C.muted,
+        letterSpacing: 1,
+        marginBottom: 4
+      }
+    }, s.label), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: isMobile ? 20 : 24,
+        fontWeight: 800,
+        fontFamily: "'Space Grotesk',sans-serif",
+        color: C.text
+      }
+    }, s.value), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: s.subColor,
+        marginTop: 2
+      }
+    }, s.sub));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.card,
+      borderRadius: 14,
+      border: "1px solid ".concat(C.border),
+      padding: isMobile ? "12px 14px" : "14px 18px",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      color: C.muted,
+      letterSpacing: 1
+    }
+  }, "MONTHLY BUDGET"), editingBudget ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: budgetInput,
+    onChange: function onChange(e) {
+      return setBudgetInput(e.target.value);
+    },
+    onKeyDown: function onKeyDown(e) {
+      if (e.key === "Enter") saveBudget(budgetInput);
+      if (e.key === "Escape") setEditingBudget(false);
+    },
+    style: {
+      background: C.bg,
+      border: "1px solid ".concat(C.lime),
+      borderRadius: 8,
+      color: C.text,
+      padding: "4px 10px",
+      fontSize: 14,
+      width: 80,
+      outline: "none"
+    },
+    autoFocus: true
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return saveBudget(budgetInput);
+    },
+    style: {
+      background: C.lime,
+      color: "#000",
+      border: "none",
+      borderRadius: 8,
+      padding: "6px 12px",
+      fontWeight: 700,
+      fontSize: 13,
+      cursor: "pointer"
+    }
+  }, "\u2713"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return setEditingBudget(false);
+    },
+    style: {
+      background: C.border,
+      color: C.text,
+      border: "none",
+      borderRadius: 8,
+      padding: "6px 12px",
+      fontWeight: 700,
+      fontSize: 13,
+      cursor: "pointer"
+    }
+  }, "\u2715")) : /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return setEditingBudget(true);
+    },
+    style: {
+      background: "transparent",
+      border: "none",
+      color: C.muted,
+      fontSize: 12,
+      cursor: "pointer",
+      padding: "4px 8px"
+    }
+  }, "\u270F\uFE0F edit")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.bg,
+      borderRadius: 8,
+      height: 10,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: "100%",
+      width: "".concat(budgetPct * 100, "%"),
+      background: "linear-gradient(90deg,".concat(budgetColor, ",").concat(budgetColor, "88)"),
+      borderRadius: 8,
+      transition: "width 0.5s ease"
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginTop: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: budgetColor,
+      fontWeight: 700
+    }
+  }, (budgetPct * 100).toFixed(0), "% used"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: C.muted
+    }
+  }, "$", budget, " budget"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: isMobile ? "1fr" : "1fr 1.7fr",
+      gap: 12,
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.card,
+      borderRadius: 14,
+      border: "1px solid ".concat(C.border),
+      padding: "14px 16px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      color: C.muted,
+      letterSpacing: 1
+    }
+  }, "BY CATEGORY"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 3,
+      background: C.bg,
+      borderRadius: 8,
+      padding: 3
+    }
+  }, [["1mo", "1M"], ["3mo", "3M"], ["all", "All"]].map(function (_ref15) {
+    var _ref16 = _slicedToArray(_ref15, 2),
+      key = _ref16[0],
+      label = _ref16[1];
+    return /*#__PURE__*/React.createElement("button", {
+      key: key,
+      onClick: function onClick() {
+        return setDonutRange(key);
+      },
+      style: {
+        background: donutRange === key ? C.lime : "transparent",
+        color: donutRange === key ? "#000" : C.muted,
+        border: "none",
+        borderRadius: 6,
+        padding: "3px 8px",
+        fontWeight: 700,
+        fontSize: 10,
+        cursor: "pointer",
+        transition: "all 0.15s"
+      }
+    }, label);
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: C.muted,
+      marginBottom: 8
+    }
+  }, rangeLabels[donutRange]), donutData.length > 0 ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(ResponsiveContainer, {
+    width: "100%",
+    height: isMobile ? 200 : 190
+  }, /*#__PURE__*/React.createElement(PieChart, null, /*#__PURE__*/React.createElement(Pie, {
+    data: donutData,
+    cx: "50%",
+    cy: "45%",
+    innerRadius: isMobile ? 55 : 50,
+    outerRadius: isMobile ? 85 : 75,
+    paddingAngle: 3,
+    dataKey: "value"
+  }, donutData.map(function (e, i) {
+    return /*#__PURE__*/React.createElement(Cell, {
+      key: i,
+      fill: DONUT_COLORS[e.name] || "#888"
+    });
+  })), /*#__PURE__*/React.createElement(Tooltip, {
+    content: /*#__PURE__*/React.createElement(DonutTooltip, null)
+  }), /*#__PURE__*/React.createElement(Legend, {
+    iconType: "circle",
+    iconSize: 7,
+    formatter: function formatter(v) {
+      return /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 10,
+          color: C.muted
+        }
+      }, v);
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8,
+      display: "flex",
+      flexDirection: "column",
+      gap: 5
+    }
+  }, donutData.slice(0, 3).map(function (d, i) {
+    var total = donutData.reduce(function (s, x) {
+      return s + x.value;
+    }, 0);
+    var pct = (d.value / total * 100).toFixed(0);
+    var color = DONUT_COLORS[d.name] || "#888";
+    return /*#__PURE__*/React.createElement("div", {
+      key: i
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        marginBottom: 3
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: color,
+        fontWeight: 700
+      }
+    }, d.name), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: C.text,
+        fontWeight: 700
+      }
+    }, "$", d.value.toFixed(0), " ", /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: C.muted,
+        fontWeight: 400
+      }
+    }, "(", pct, "%)"))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: C.bg,
+        borderRadius: 4,
+        height: 4
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        height: "100%",
+        width: "".concat(pct, "%"),
+        background: color,
+        borderRadius: 4,
+        transition: "width 0.5s ease"
+      }
+    })));
+  }))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: C.muted,
+      fontSize: 13,
+      padding: 20
+    }
+  }, "No data for this period")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.card,
+      borderRadius: 14,
+      border: "1px solid ".concat(C.border),
+      padding: "14px 16px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      color: C.muted,
+      letterSpacing: 1
+    }
+  }, "SPEND TREND"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: C.muted
+    }
+  }, "monthly spend vs $", budget, " budget")), /*#__PURE__*/React.createElement(ResponsiveContainer, {
+    width: "100%",
+    height: isMobile ? 180 : 220
+  }, /*#__PURE__*/React.createElement(LineChart, {
+    data: chartData,
+    margin: {
+      top: 10,
+      right: 8,
+      left: -15,
+      bottom: 0
+    }
+  }, /*#__PURE__*/React.createElement(CartesianGrid, {
+    strokeDasharray: "3 3",
+    stroke: C.border
+  }), /*#__PURE__*/React.createElement(XAxis, {
+    dataKey: "date",
+    tick: {
+      fill: C.muted,
+      fontSize: 9
+    },
+    axisLine: false,
+    tickLine: false
+  }), /*#__PURE__*/React.createElement(YAxis, {
+    tick: {
+      fill: C.muted,
+      fontSize: 9
+    },
+    axisLine: false,
+    tickLine: false,
+    tickFormatter: function tickFormatter(v) {
+      return "$".concat(v);
+    }
+  }), /*#__PURE__*/React.createElement(Tooltip, {
+    content: /*#__PURE__*/React.createElement(LineTooltip, null)
+  }), /*#__PURE__*/React.createElement(Line, {
+    type: "monotone",
+    dataKey: function dataKey() {
+      return budget;
+    },
+    stroke: C.muted,
+    strokeDasharray: "5 5",
+    strokeWidth: 1,
+    dot: false,
+    legendType: "none",
+    activeDot: false
+  }), /*#__PURE__*/React.createElement(Line, {
+    type: "monotone",
+    dataKey: "total",
+    stroke: C.lime,
+    strokeWidth: 3,
+    dot: function dot(props) {
+      var _props$payload;
+      var over = ((_props$payload = props.payload) === null || _props$payload === void 0 ? void 0 : _props$payload.total) > budget;
+      return /*#__PURE__*/React.createElement("circle", {
+        key: props.index,
+        cx: props.cx,
+        cy: props.cy,
+        r: 5,
+        fill: over ? C.coral : C.lime,
+        stroke: "none"
+      });
+    },
+    activeDot: {
+      r: 6,
+      fill: C.lime
+    }
+  }))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.card,
+      borderRadius: 14,
+      border: "1px solid ".concat(C.border),
+      padding: isMobile ? "14px 14px" : "18px 20px",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: insightsLoading || insights ? 14 : 0
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      color: C.muted,
+      letterSpacing: 1
+    }
+  }, "\u2728 AI INSIGHTS"), insights && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.muted,
+      marginTop: 2
+    }
+  }, "Based on your ", orders.length, " orders")), /*#__PURE__*/React.createElement("button", {
+    onClick: generateInsights,
+    disabled: insightsLoading,
+    style: {
+      background: insightsLoading ? C.border : "linear-gradient(135deg,".concat(C.purple, ",").concat(C.pink, ")"),
+      color: "#fff",
+      border: "none",
+      borderRadius: 10,
+      padding: "8px 14px",
+      fontWeight: 700,
+      fontSize: 12,
+      cursor: insightsLoading ? "default" : "pointer",
+      opacity: insightsLoading ? 0.7 : 1,
+      minWidth: isMobile ? 100 : 120
+    }
+  }, insightsLoading ? "Analyzing..." : insights ? "↺ Refresh" : "✨ Generate")), insightsLoading && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      padding: "8px 0"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 18,
+      height: 18,
+      borderRadius: "50%",
+      border: "3px solid ".concat(C.border),
+      borderTop: "3px solid ".concat(C.purple),
+      animation: "spin 0.8s linear infinite",
+      flexShrink: 0
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.muted,
+      fontSize: 13,
+      animation: "pulse 1.5s infinite"
+    }
+  }, "Crunching your grocery data...")), !insightsLoading && insights && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 8
+    }
+  }, insights.map(function (ins, i) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        display: "flex",
+        gap: 10,
+        alignItems: "flex-start",
+        padding: "10px 12px",
+        borderRadius: 12,
+        background: "linear-gradient(135deg,".concat(C.purple, "10,").concat(C.pink, "08)"),
+        border: "1px solid ".concat(C.purple, "25"),
+        animation: "fadeUp 0.3s ease ".concat(i * 0.07, "s both")
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 18,
+        flexShrink: 0,
+        marginTop: 1
+      }
+    }, ins.emoji), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontWeight: 700,
+        fontSize: 13,
+        marginBottom: 2,
+        color: C.text
+      }
+    }, ins.title), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: C.muted,
+        lineHeight: 1.6
+      }
+    }, ins.detail)));
+  })), !insightsLoading && !insights && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: C.muted,
+      fontSize: 13,
+      fontStyle: "italic",
+      paddingTop: 4
+    }
+  }, "Tap \"Generate\" for AI-powered takeaways from your grocery history.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      color: C.muted,
+      letterSpacing: 1,
+      marginBottom: 10
+    }
+  }, "ORDER HISTORY"), orders.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.card,
+      borderRadius: 14,
+      border: "1px solid ".concat(C.border),
+      padding: 40,
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 40,
+      marginBottom: 12
+    }
+  }, "\uD83E\uDDFA"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      fontSize: 16,
+      marginBottom: 6
+    }
+  }, "No orders yet!"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: C.muted,
+      fontSize: 13,
+      marginBottom: 16
+    }
+  }, "Add your first receipt to get started."), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return setTab("add");
+    },
+    style: btnStyle(C.lime, "#000")
+  }, "Add First Receipt \u2192")) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 8
+    }
+  }, orders.map(function (o) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: o.id,
+      style: {
+        background: C.card,
+        borderRadius: 14,
+        border: "1px solid ".concat(C.border),
+        overflow: "hidden",
+        transition: "all 0.2s"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: isMobile ? "12px 14px" : "14px 18px"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      onClick: function onClick() {
+        return setExpanded(expanded === o.id ? null : o.id);
+      },
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        minWidth: 0,
+        flex: 1,
+        cursor: "pointer"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 20,
+        flexShrink: 0
+      }
+    }, "\uD83D\uDFE2"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontWeight: 700,
+        fontSize: isMobile ? 13 : 14,
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis"
+      }
+    }, o.store), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: C.muted
+      }
+    }, o.date, " \xB7 ", o.items.length, " items"))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        flexShrink: 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      onClick: function onClick() {
+        return setExpanded(expanded === o.id ? null : o.id);
+      },
+      style: {
+        fontSize: isMobile ? 16 : 18,
+        fontWeight: 800,
+        color: C.lime,
+        fontFamily: "'Space Grotesk',sans-serif",
+        cursor: "pointer"
+      }
+    }, "$", o.total.toFixed(2)), /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick(e) {
+        e.stopPropagation();
+        setConfirmDelete(o.id);
+      },
+      style: {
+        background: "transparent",
+        border: "1px solid ".concat(C.border),
+        borderRadius: 8,
+        color: C.muted,
+        fontSize: 13,
+        cursor: "pointer",
+        padding: "4px 8px",
+        lineHeight: 1
+      },
+      title: "Remove order"
+    }, "\uD83D\uDDD1\uFE0F"), /*#__PURE__*/React.createElement("div", {
+      onClick: function onClick() {
+        return setExpanded(expanded === o.id ? null : o.id);
+      },
+      style: {
+        color: C.muted,
+        fontSize: 16,
+        transform: expanded === o.id ? "rotate(180deg)" : "none",
+        transition: "transform 0.2s",
+        cursor: "pointer"
+      }
+    }, "\u25BE"))), expanded === o.id && /*#__PURE__*/React.createElement("div", {
+      style: {
+        borderTop: "1px solid ".concat(C.border),
+        padding: isMobile ? "12px 14px" : "14px 18px",
+        animation: "fadeUp 0.2s ease"
+      }
+    }, o.analysis && /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: C.bg,
+        borderRadius: 10,
+        padding: "10px 12px",
+        marginBottom: 12,
+        fontSize: 13,
+        color: C.muted,
+        lineHeight: 1.6,
+        borderLeft: "3px solid ".concat(C.lime)
+      }
+    }, o.analysis), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 6
+      }
+    }, o.items.map(function (item, i) {
+      return /*#__PURE__*/React.createElement("div", {
+        key: i,
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 8
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          minWidth: 0
+        }
+      }, /*#__PURE__*/React.createElement(Pill, {
+        label: item.category
+      }), /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 12,
+          color: C.text,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap"
+        }
+      }, item.name)), /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 13,
+          fontWeight: 700,
+          color: C.lime,
+          flexShrink: 0
+        }
+      }, "$", item.price.toFixed(2)));
+    }))));
+  }))), confirmDelete && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      inset: 0,
+      background: "#0F0F1Acc",
+      zIndex: 300,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.card,
+      border: "1px solid ".concat(C.coral),
+      borderRadius: 16,
+      padding: "24px",
+      maxWidth: 320,
+      width: "100%",
+      textAlign: "center",
+      animation: "fadeUp 0.2s ease"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 28,
+      marginBottom: 12
+    }
+  }, "\uD83D\uDDD1\uFE0F"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      fontSize: 16,
+      marginBottom: 8
+    }
+  }, "Remove this order?"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: C.muted,
+      fontSize: 13,
+      marginBottom: 20
+    }
+  }, "This can't be undone."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return setConfirmDelete(null);
+    },
+    style: {
+      background: C.border,
+      color: C.text,
+      border: "none",
+      borderRadius: 10,
+      padding: "10px 20px",
+      fontWeight: 700,
+      fontSize: 14,
+      cursor: "pointer",
+      flex: 1
+    }
+  }, "Cancel"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return deleteOrder(confirmDelete);
+    },
+    style: {
+      background: C.coral,
+      color: "#fff",
+      border: "none",
+      borderRadius: 10,
+      padding: "10px 20px",
+      fontWeight: 700,
+      fontSize: 14,
+      cursor: "pointer",
+      flex: 1
+    }
+  }, "Remove")))), tab === "add" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      animation: "fadeUp 0.35s ease"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.card,
+      borderRadius: 14,
+      border: "1px solid ".concat(C.border),
+      padding: isMobile ? "16px" : "20px",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: isMobile ? "column" : "row",
+      gap: isMobile ? 16 : 24
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      color: C.muted,
+      letterSpacing: 1,
+      marginBottom: 12
+    }
+  }, "SELECT STORE"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      flexWrap: "wrap"
+    }
+  }, ["Wegmans", "Whole Foods", "Other"].map(function (s) {
+    return /*#__PURE__*/React.createElement("button", {
+      key: s,
+      onClick: function onClick() {
+        return setStore(s);
+      },
+      style: {
+        background: store === s ? C.lime : "transparent",
+        color: store === s ? "#000" : C.muted,
+        border: "1px solid ".concat(store === s ? C.lime : C.border),
+        borderRadius: 20,
+        padding: "8px 16px",
+        fontWeight: 700,
+        fontSize: 13,
+        cursor: "pointer"
+      }
+    }, s);
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      color: C.muted,
+      letterSpacing: 1,
+      marginBottom: 12
+    }
+  }, "ORDER DATE"), /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: orderDate,
+    onChange: function onChange(e) {
+      return setOrderDate(e.target.value);
+    },
+    style: {
+      background: C.bg,
+      border: "1px solid ".concat(C.lime),
+      borderRadius: 10,
+      color: C.text,
+      padding: "8px 14px",
+      fontSize: 14,
+      outline: "none",
+      width: "100%",
+      fontFamily: "inherit",
+      cursor: "pointer"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.muted,
+      marginTop: 6
+    }
+  }, "Overrides date on receipt if found")))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.card,
+      borderRadius: 14,
+      border: "1px solid ".concat(C.border),
+      padding: isMobile ? "16px" : "20px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      color: C.muted,
+      letterSpacing: 1,
+      marginBottom: 16
+    }
+  }, "UPLOAD RECEIPT"), /*#__PURE__*/React.createElement(UploadZone, {
+    onFile: handleFile,
+    onText: handleText,
+    label: "Drop or tap to upload receipt",
+    accept: "image/*,application/pdf",
+    placeholder: "Paste receipt text here..."
+  }))), tab === "estimate" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      animation: "fadeUp 0.35s ease"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.card,
+      borderRadius: 14,
+      border: "1px solid ".concat(C.border),
+      padding: isMobile ? "16px" : "20px",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      color: C.muted,
+      letterSpacing: 1,
+      marginBottom: 6
+    }
+  }, "MEAL PLAN COST ESTIMATOR"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: C.muted,
+      marginBottom: 16
+    }
+  }, "Paste your weekly meal plan and get an estimated grocery cost based on your history."), /*#__PURE__*/React.createElement(UploadZone, {
+    onFile: function onFile() {},
+    onText: handleMealPlan,
+    label: "Upload meal plan",
+    accept: "image/*,application/pdf",
+    placeholder: "e.g. Monday: grilled salmon + asparagus + sweet potato\nTuesday: chicken stir fry with peppers and rice noodles..."
+  })), estimate && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.card,
+      borderRadius: 14,
+      border: "1px solid ".concat(C.border),
+      padding: isMobile ? "16px" : "20px",
+      animation: "fadeUp 0.35s ease"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      color: C.muted,
+      letterSpacing: 1
+    }
+  }, "ESTIMATED CART"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 20,
+      fontWeight: 800,
+      color: C.lime,
+      fontFamily: "'Space Grotesk',sans-serif"
+    }
+  }, "$", estimate.items.reduce(function (s, i) {
+    return s + i.estimated_price;
+  }, 0).toFixed(2))), estimate.store_reasoning && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.bg,
+      borderRadius: 10,
+      padding: "10px 12px",
+      marginBottom: 14,
+      fontSize: 12,
+      color: C.muted,
+      lineHeight: 1.6,
+      borderLeft: "3px solid ".concat(C.sky)
+    }
+  }, /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: C.sky
+    }
+  }, "Recommended: ", estimate.recommended_store), " \u2014 ", estimate.store_reasoning), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 6
+    }
+  }, estimate.items.map(function (item, i) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 8
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+        minWidth: 0,
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement(Pill, {
+      label: item.category
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap"
+      }
+    }, item.name), item.from_history && /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10,
+        color: C.sky,
+        background: "#4ECDC422",
+        border: "1px solid #4ECDC4",
+        borderRadius: 8,
+        padding: "1px 6px",
+        flexShrink: 0
+      }
+    }, "history"), item.from_search && /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10,
+        color: C.orange,
+        background: "#FF9F1C22",
+        border: "1px solid #FF9F1C",
+        borderRadius: 8,
+        padding: "1px 6px",
+        flexShrink: 0
+      }
+    }, "web"), item.needs_lookup && /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10,
+        color: C.muted,
+        background: "#88888822",
+        border: "1px solid #888",
+        borderRadius: 8,
+        padding: "1px 6px",
+        flexShrink: 0
+      }
+    }, "est")), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 13,
+        fontWeight: 700,
+        color: C.lime,
+        flexShrink: 0
+      }
+    }, "$", item.estimated_price.toFixed(2)));
+  }))))));
+}
+
+    // Mount the app
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(App));
+  </script>
+</body>
+</html>
